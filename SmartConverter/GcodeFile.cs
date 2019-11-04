@@ -63,6 +63,7 @@ namespace SmartConverter
             }
         }
 
+
         public GcodeFile(string gcodePath)
         {
             path = gcodePath;
