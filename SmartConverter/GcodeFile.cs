@@ -63,7 +63,6 @@ namespace SmartConverter
             }
         }
 
-
         public GcodeFile(string gcodePath)
         {
             path = gcodePath;
@@ -130,7 +129,7 @@ namespace SmartConverter
         private List<string> GetGcode()
         {
             gcode.Clear();
-            string currentLine = "";
+            string currentLine;
             bool switch_keep_discard = true;
 
             while ((currentLine = file.ReadLine()) != null)
@@ -166,6 +165,7 @@ namespace SmartConverter
         }
         public bool CheckGcode(string path)
         {
+            File.WriteAllText(path, String.Empty);
             File.WriteAllLines(path, gcode);
 
             return true;
@@ -173,22 +173,19 @@ namespace SmartConverter
 
         public List<string> GetGcodeInLayer(int layerNr)
         {
-            List<string> gcodeInLayer = new List<string> { };
+            List<string> gcodeInLayer;
 
             string currentLayerKeyword = ";LAYER:" + layerNr.ToString();
             string nextLayerKeyword = ";LAYER:" + (layerNr + 1).ToString();
 
             int firstIndex = gcode.IndexOf(currentLayerKeyword);
-            int lastIndex;
+            int lastIndex = gcode.IndexOf(nextLayerKeyword) - 1;
 
-            try
-            {
-                lastIndex = gcode.IndexOf(nextLayerKeyword) - 1;
-            }
-            catch
-            {
-                lastIndex = gcode.Count;
-            }
+            if (firstIndex < 0)
+                firstIndex = 0;
+            if (lastIndex < firstIndex)
+                lastIndex = gcode.Count - 1;
+
             int length = lastIndex - firstIndex + 1;
 
             gcodeInLayer = gcode.GetRange(firstIndex, length);

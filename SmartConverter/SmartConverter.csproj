@@ -59,6 +59,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LayerContour.cs" />
     <Compile Include="GcodeFile.cs" />
     <Compile Include="GcodeLine.cs" />
     <Compile Include="NX.cs" />

@@ -24,32 +24,85 @@ namespace SmartConverter
             NONMESH,
             MESH,
             OUTERWALL,
-            Unknown
+            Unknown,
+            Error
         }
 
         // Field
-        private string line = "";
-        private double x = 0;
-        private double y = 0;
-        private double z = 0;
-        private bool enableE = false; // Gcode with Extrude
-        
-        private static int lineNr = 0;
+        private string line;
+        private LType lineType = LType.Unknown;
+        private CType commentType = CType.Unknown;
+        private int layerNr = -1;
 
-        private static double currentX = 0;
-        private static double currentY = 0;
-        private static double currentZ = 0;
+        private readonly char[] element = new char[] { 'X', 'Y', 'Z', 'E' };
+        private bool[] elementExist = new bool[] { false, false, false, false}; // element: X Y Z E
+        private int[] elementIndex = new int[] { -1, -1, -1, -1 };
+        private double[] elementValue = new double[] { 0, 0, 0, 0 };
 
-        public LType lineType;
+        public static double currentX = 0;
+        public static double currentY = 0;
 
+        // Property
+        public LType LineType
+        {
+            get
+            {
+                return lineType;
+            }
+        }
+        public CType CommentType
+        {
+            get
+            {
+                return commentType;
+            }
+        }
+        public int LayerNr
+        {
+            get
+            {
+                return layerNr;
+            }
+            set
+            {
+                layerNr = value;
+            }
+        }
+        public double X
+        {
+            get
+            {
+                return elementValue[0];
+            }
+        }
+        public double Y
+        {
+            get
+            {
+                return elementValue[1];
+            }
+        }
+        public bool EnableE
+        {
+            get
+            {
+                return elementExist[3];
+            }
+        }
 
         public GcodeLine(string thisLine)
         {
             line = thisLine;
             lineType = GetLineType(line);
+
             if (lineType == LType.Gcode)
             {
-                GetXYZ();
+                CheckElement();
+                GetPointValue();
+            }
+            else if (lineType == LType.Comment)
+            {
+                commentType = GetCommentType(line);
             }
         }
 
@@ -57,7 +110,7 @@ namespace SmartConverter
         public static LType GetLineType(string gcodeLine)
         {
             char firstLetter = gcodeLine[0];
-            LType myLType = LType.Unknown;
+            LType myLType;
             switch (firstLetter)
             {
                 case ';':
@@ -89,7 +142,7 @@ namespace SmartConverter
             CType myCType = CType.Unknown;
             if (commentLine[0] == ';')
             {
-                switch(GetCommentKeyword(commentLine))
+                switch (GetCommentKeyword(commentLine))
                 {
                     case "LAYER_COUNT":
                         {
@@ -123,9 +176,13 @@ namespace SmartConverter
                         }
                 }
             }
+            else
+            {
+                myCType = CType.Error;
+            }
 
             return myCType;
-        }   // done
+        }
         private static string GetCommentKeyword(string comment)
         {
             string keyword = "Unknown";
@@ -137,12 +194,85 @@ namespace SmartConverter
             else if (comment.Contains("TYPE:WALL-OUTER")) { keyword = "OUTERWALL"; }
 
             return keyword;
-        }   // done
-
-        private static void GetXYZ()
+        }
+        private void GetLayerNr()
         {
-
+            if((lineType == LType.Comment) && (commentType == CType.LAYER))
+            {
+                int firstIndex = line.IndexOf(":") + 1;
+                int length = line.Length - firstIndex;
+                layerNr = Int32.Parse(line.Substring(firstIndex, length));
+            }
         }
 
+        private void CheckElement()
+        {
+            for(int i = 0; i <= element.Length - 1; i++)
+            {
+                if(line.Contains(element[i]))
+                {
+                    elementExist[i] = true;
+                    elementIndex[i] = line.IndexOf(element[i]);
+                }
+                else
+                {
+                    elementExist[i] = false;
+                    elementIndex[i] = -1;
+                }
+            }
+        }   // check if current gcode line contains element of X/Y/Z/E
+        private void GetPointValue()
+        {
+            for (int i = 0; i <= element.Length - 1; i++)
+            {
+                if (elementExist[i])
+                {
+                    for (int j = i + 1; j <= element.Length - 1; j++)
+                    {
+                        string valStr = "";
+                        if (elementExist[j])    // exists next element
+                        {
+                            valStr = line.Substring(elementIndex[i] + 1, elementIndex[j] - elementIndex[i] - 1);
+                            elementValue[i] = Double.Parse(valStr);
+                            break;
+                        }
+                        else if (j == element.Length - 1)
+                        {
+                            valStr = line.Substring(elementIndex[i] + 1, line.Length - elementIndex[i] - 1);
+                            elementValue[i] = Double.Parse(valStr);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if ((elementValue[0] != 0) && (elementValue[1] == 0))
+            {
+                Console.WriteLine(line);
+                Console.WriteLine("elementValue[0] = " + elementValue[0]);
+                Console.WriteLine("elementValue[1] = " + elementValue[1]);
+                Console.WriteLine("This is ERROR\n");
+            }
+        }   // get the value of coordinate X and Y in current gcode line
+
+        public static List<GcodeLine> ConvertFormart(int layerNr, List<string> gcodeStringSet)
+        {
+            List<GcodeLine> gcodeConverted = new List<GcodeLine> { };
+
+            foreach (string thisLine in gcodeStringSet)
+            {
+                GcodeLine thisGcode = new GcodeLine(thisLine)
+                {
+                    LayerNr = layerNr
+                };
+
+                if (thisGcode.LineType == GcodeLine.LType.Gcode)
+                {
+                    gcodeConverted.Add(thisGcode);
+                }
+            }
+
+            return gcodeConverted;
+        }
     } 
 }

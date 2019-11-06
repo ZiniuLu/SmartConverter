@@ -12,6 +12,8 @@ namespace SmartConverter
         // Field
         private string name = "";
         private string path = "";
+        private static List<string> gcodeLineInLayer = new List<string> { };
+        private static List<GcodeLine> gcodeInLayer = new List<GcodeLine> { };
 
         // Property
         public string Name
@@ -39,6 +41,14 @@ namespace SmartConverter
                 }
             }
         }
+        public static List<string> GcodeLineInLayer
+        {
+            set
+            {
+                gcodeLineInLayer = value;
+            }
+        }
+
 
         // Method
         public int Create(string dir)
@@ -52,7 +62,6 @@ namespace SmartConverter
                 return 0;
             }
         }
-
         public int Create()
         {
             if (Directory.Exists(path))
@@ -64,7 +73,6 @@ namespace SmartConverter
                 return -1;
             }
         }
-
         public int Close(bool save)
         {
             if (save)
@@ -77,9 +85,19 @@ namespace SmartConverter
             }
         }
 
-        public void GetPointSet(int layerNr)
+        
+
+
+        private void ConvertGcode(string gcodeInString, int layerNr)
         {
-            // Get all Poins in current layer from Gcode
+            GcodeLine thisGcode = new GcodeLine(gcodeInString)
+            {
+                LayerNr = layerNr
+            };
+            if (thisGcode.LineType == GcodeLine.LType.Gcode)
+            {
+                gcodeInLayer.Add(thisGcode);
+            }
         }
 
         public void BuildCurrentLayer()
