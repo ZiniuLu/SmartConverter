@@ -6,23 +6,23 @@ using System.Threading.Tasks;
 
 namespace SmartConverter
 {
-    public struct Point
+    public struct _Point
     {
         public int PointID;
         public double X;
         public double Y;
         public double Z;
     }
-    public struct Curve
+    public struct _Curve
     {
         // Field
         public int CurveID;
-        public List<Point> Points;
+        public List<_Point> Points;
     }
-    public struct Contour
+    public struct _Contour
     {
         public int LayerID;
-        public List<Curve> Curves;
+        public List<_Curve> Curves;
     }
 
 
@@ -34,9 +34,9 @@ namespace SmartConverter
         private double z;
         private List<string> gcodeStringInLayer;
 
-        private List<Point> points = new List<Point>();
-        private List<Curve> curves = new List<Curve>();
-        private Contour myContour;
+        private List<_Point> points = new List<_Point>();
+        private List<_Curve> curves = new List<_Curve>();
+        private _Contour myContour;
 
         private int pointCounter = 0;
         private int curveCounter = 0;
@@ -61,7 +61,7 @@ namespace SmartConverter
                 return z;
             }
         }
-        public Contour MyContour
+        public _Contour MyContour
         {
             get
             {
@@ -101,7 +101,7 @@ namespace SmartConverter
 
                 if (gcodeInLayer[c].EnableE)    // exists extrude(E) in current gcode line
                 {
-                    Point currentPoint = new Point
+                    _Point currentPoint = new _Point
                     {
                         PointID = pointCounter,
                         X = gcodeInLayer[c].X,
@@ -112,7 +112,7 @@ namespace SmartConverter
 
                     if (pointCounter == 0)
                     {
-                        Console.WriteLine("\n\tCurve " + curveCounter + "\t--------------------------------------------------");
+                        //Console.WriteLine("\n\tCurve " + curveCounter + "\t--------------------------------------------------");
                     }
                     //Console.WriteLine("\t\tP" + pointCounter + "\tX = " + points[pointCounter].X + "\t Y = " + points[pointCounter].Y + "\t Z = " + points[pointCounter].Z);
 
@@ -122,7 +122,7 @@ namespace SmartConverter
                     }
                     else
                     {
-                        Curve currentCurve = new Curve
+                        _Curve currentCurve = new _Curve
                         {
                             CurveID = curveCounter,
                             Points = points
@@ -130,14 +130,14 @@ namespace SmartConverter
                         curves.Add(currentCurve);
 
                         pointCounter = 0;
-                        points = new List<Point>();
+                        points = new List<_Point>();
 
                         curveCounter++;
                     }
                 }
                 else if (gcodeInLayer[c+1].EnableE)
                 {
-                    Point currentPoint = new Point
+                    _Point currentPoint = new _Point
                     {
                         PointID = pointCounter,
                         X = gcodeInLayer[c].X,
@@ -148,7 +148,7 @@ namespace SmartConverter
 
                     if (pointCounter == 0)
                     {
-                        Console.WriteLine("\n\tCurve " + curveCounter + "\t--------------------------------------------------");
+                        //Console.WriteLine("\n\tCurve " + curveCounter + "\t--------------------------------------------------");
                     }
                     //Console.WriteLine("\t\tP" + pointCounter + "\tX = " + points[pointCounter].X + "\t Y = " + points[pointCounter].Y + "\t Z = " + points[pointCounter].Z);
                     pointCounter++;
@@ -157,7 +157,7 @@ namespace SmartConverter
 
             if(gcodeInLayer[gcodeLineNr].EnableE)   // check the last line
             {
-                Point currentPoint = new Point
+                _Point currentPoint = new _Point
                 {
                     PointID = pointCounter,
                     X = gcodeInLayer[gcodeLineNr].X,
@@ -168,11 +168,11 @@ namespace SmartConverter
 
                 if (pointCounter == 0)
                 {
-                    Console.WriteLine("\n\tCurve " + curveCounter + "\t--------------------------------------------------");
+                    //Console.WriteLine("\n\tCurve " + curveCounter + "\t--------------------------------------------------");
                 }
                 //Console.WriteLine("\t\tP" + pointCounter + "\tX = " + points[pointCounter].X + "\t Y = " + points[pointCounter].Y + "\t Z = " + points[pointCounter].Z);
 
-                Curve currentCurve = new Curve
+                _Curve currentCurve = new _Curve
                 {
                     CurveID = curveCounter,
                     Points = points

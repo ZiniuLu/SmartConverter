@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{7B0B6F16-5F55-42F7-BF3F-F8DF97FF5676}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SmartConverter</RootNamespace>
     <AssemblyName>SmartConverter</AssemblyName>
@@ -59,6 +59,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CMD.cs" />
     <Compile Include="LayerContour.cs" />
     <Compile Include="GcodeFile.cs" />
     <Compile Include="GcodeLine.cs" />
