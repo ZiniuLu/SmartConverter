@@ -14,9 +14,9 @@ namespace SmartConverter
         private string name = "";
         private StreamReader file;
 
-        private int lineCount = 0;
-        private int layerCount = 0;
-        private List<string>  gcode = new List<string> { };
+        private int lineCount = 0;      // number of closed lines/curves in a layer
+        private int layerCount = 0;     // number of layers
+        private List<string>  gcodeText = new List<string> { };
 
         // Property
         public string Name
@@ -37,15 +37,8 @@ namespace SmartConverter
                 if (File.Exists(value) && (value.EndsWith(".gcode") || value.EndsWith (".txt")))
                 {
                     path = value;
-                    GetFileName();
+                    GetGcodeFileName();
                 }
-            }
-        }
-        public int LineCount
-        {
-            get
-            {
-                return lineCount;
             }
         }
         public int LayerCount
@@ -55,20 +48,20 @@ namespace SmartConverter
                 return layerCount;
             }
         }
-        public List<string> Gcode
+        public List<string> GcodeText
         {
             get
             {
-                return gcode;
+                return gcodeText;
             }
         }
 
-        public GcodeFile(string gcodePath)
+        public GcodeFile(string pathGcodeFile)
         {
-            path = gcodePath;
+            path = pathGcodeFile;
             if (Open())
             {
-                GetGcode();
+                GetGcodeText();
                 GetLayerCount();
             }
 
@@ -84,13 +77,10 @@ namespace SmartConverter
             try
             {
                 file = new StreamReader(path);
-                Console.WriteLine("Gcode File is opened!\n");
                 return true;
             }
             catch (Exception)
             {
-                Console.WriteLine("Open Gcode File failed!\n");
-                Console.ReadLine();
                 return false;
             }
         }
@@ -107,7 +97,7 @@ namespace SmartConverter
             }
             return true;
         }
-        private void GetFileName()
+        private void GetGcodeFileName()
         {
             int firstIndex = path.LastIndexOf("\\");
             int lastIndex = path.LastIndexOf(".");
@@ -116,9 +106,9 @@ namespace SmartConverter
         }
         private void GetLayerCount()
         {
-            if (gcode.Count > 0)
+            if (gcodeText.Count > 0)
             {
-                string line = gcode[0];
+                string line = gcodeText[0];
                 int firstIndex = line.IndexOf(":") + 1;
                 int length = line.Length - firstIndex;
 
@@ -126,9 +116,9 @@ namespace SmartConverter
             }
         }
 
-        private List<string> GetGcode()
+        private List<string> GetGcodeText()
         {
-            gcode.Clear();
+            gcodeText.Clear();
             string currentLine;
             bool switch_keep_discard = true;
 
@@ -146,7 +136,7 @@ namespace SmartConverter
                         default:
                             {
                                 switch_keep_discard = true;
-                                gcode.Add(currentLine);
+                                gcodeText.Add(currentLine);
                                 lineCount++;
                                 break;
                             }
@@ -154,41 +144,41 @@ namespace SmartConverter
                 }
                 else if ((GcodeLine.GetLineType(currentLine) == GcodeLine.LType.Gcode) && switch_keep_discard)
                 {
-                    gcode.Add(currentLine);
+                    gcodeText.Add(currentLine);
                     lineCount++;
                     //Console.WriteLine("L{0}: {1}\n", lineCount, line);
                 }
             }
             //Console.WriteLine("line count: {0} lines", lineCount);
 
-            return gcode;
+            return gcodeText;
         }
-        public bool CheckGcode(string path)
+        public bool PrintFilteredGcode(string path)
         {
             File.WriteAllText(path, String.Empty);
-            File.WriteAllLines(path, gcode);
+            File.WriteAllLines(path, gcodeText);
 
             return true;
         }
 
-        public List<string> GetGcodeInLayer(int layerNr)
+        public List<string> GetGcodeTextInLayer(int layerNr)
         {
             List<string> gcodeInLayer;
 
             string currentLayerKeyword = ";LAYER:" + layerNr.ToString();
             string nextLayerKeyword = ";LAYER:" + (layerNr + 1).ToString();
 
-            int firstIndex = gcode.IndexOf(currentLayerKeyword);
-            int lastIndex = gcode.IndexOf(nextLayerKeyword) - 1;
+            int firstIndex = gcodeText.IndexOf(currentLayerKeyword);
+            int lastIndex = gcodeText.IndexOf(nextLayerKeyword) - 1;
 
             if (firstIndex < 0)
                 firstIndex = 0;
             if (lastIndex < firstIndex)
-                lastIndex = gcode.Count - 1;
+                lastIndex = gcodeText.Count - 1;
 
             int length = lastIndex - firstIndex + 1;
 
-            gcodeInLayer = gcode.GetRange(firstIndex, length);
+            gcodeInLayer = gcodeText.GetRange(firstIndex, length);
 
             return gcodeInLayer;
         }

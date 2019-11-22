@@ -10,13 +10,13 @@ namespace SmartConverter
     {
         public static void Main()
         {
-            string gcodePath = @"D:\C#\Code\NX12\SmartConverter\SmartConverter\2xUM2_beam.gcode";
+            string pathGcodeFile = @"D:\C#\Code\NX12\SmartConverter\SmartConverter\2xUM2_beam.gcode";
 
             //string pathToCheck = @"D:\C#\Code\NX12\SmartConverter\SmartConverter\CheckGcode.txt";
 
             try
             {
-                GeneratePRT(gcodePath);
+                BuildModelInNX(pathGcodeFile);
             }
             catch (Exception ex)
             {
@@ -25,38 +25,25 @@ namespace SmartConverter
             }
         }
 
-        private static int GeneratePRT(string pathGcode, string pathToCheck = "")
+        private static int BuildModelInNX(string pathGcodeFile, string pathFilteredGcode = "")
         {
-            Console.WriteLine("Start!\n");
-
             // 1. read gcode file
-            Console.WriteLine("1. Read Gcode file:");
-            GcodeFile myGcodeFile = new GcodeFile(pathGcode);
-            
-            if(pathToCheck != "")
-                myGcodeFile.CheckGcode(pathToCheck);
+            GcodeFile myGcodeFile = new GcodeFile(pathGcodeFile);
 
-            Console.WriteLine("Line Count: " + myGcodeFile.LineCount);
-            Console.WriteLine("Layer Count: " + myGcodeFile.LayerCount);
+            if(pathFilteredGcode != "")
+                myGcodeFile.PrintFilteredGcode(pathFilteredGcode);
 
             // 2. get PointSet in each layer
-            Console.WriteLine("\n----------------------------------------------\n2. Get point set in each layer");
-
             NX model = new NX();
 
             for (int layerNr = 0; layerNr < myGcodeFile.LayerCount; layerNr++)
             {
-                //Console.WriteLine("\n\nLayer " + layerNr + "..........................................................");
-
-                List<string> gcodeStringInLayer = myGcodeFile.GetGcodeInLayer(layerNr);   // get all gcode lines in one module-layer (formate: string)
+                List<string> gcodeStringInLayer = myGcodeFile.GetGcodeTextInLayer(layerNr);   // get all gcode lines in one module-layer (formate: string)
                 LayerContour myLayerContour = new LayerContour(layerNr, gcodeStringInLayer); // convert all gcode lines (string) to target format (LayerContour)
 
                 // 3. sketch in NX
-                Console.WriteLine("\n----------------------------------------------\n3. Sketch in NX");
                 model.BuildCurrentLayer(layerNr, myLayerContour.MyContour);
             }
-
-            //Console.ReadLine();
 
             return 0;
         }

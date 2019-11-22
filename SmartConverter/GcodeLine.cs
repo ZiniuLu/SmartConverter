@@ -29,15 +29,15 @@ namespace SmartConverter
         }
 
         // Field
-        private string line;
-        private LType lineType = LType.Unknown;
-        private CType commentType = CType.Unknown;
+        private readonly string line;
+        private readonly LType lineType = LType.Unknown;
+        private readonly CType commentType = CType.Unknown;
         private int layerNr = -1;
 
         private readonly char[] element = new char[] { 'X', 'Y', 'Z', 'E' };
-        private bool[] elementExist = new bool[] { false, false, false, false}; // element: X Y Z E
-        private int[] elementIndex = new int[] { -1, -1, -1, -1 };
-        private double[] elementValue = new double[] { 0, 0, 0, 0 };
+        private readonly bool[] elementExist = new bool[] { false, false, false, false}; // element: X Y Z E
+        private readonly int[] elementIndex = new int[] { -1, -1, -1, -1 };
+        private readonly double[] elementValue = new double[] { 0, 0, 0, 0 };
 
         public static double currentX = 0;
         public static double currentY = 0;
@@ -139,7 +139,7 @@ namespace SmartConverter
         }
         public static CType GetCommentType(string commentLine)
         {
-            CType myCType = CType.Unknown;
+            CType myCType;
             if (commentLine[0] == ';')
             {
                 switch (GetCommentKeyword(commentLine))
@@ -195,15 +195,6 @@ namespace SmartConverter
 
             return keyword;
         }
-        private void GetLayerNr()
-        {
-            if((lineType == LType.Comment) && (commentType == CType.LAYER))
-            {
-                int firstIndex = line.IndexOf(":") + 1;
-                int length = line.Length - firstIndex;
-                layerNr = Int32.Parse(line.Substring(firstIndex, length));
-            }
-        }
 
         private void CheckElement()
         {
@@ -229,7 +220,7 @@ namespace SmartConverter
                 {
                     for (int j = i + 1; j <= element.Length - 1; j++)
                     {
-                        string valStr = "";
+                        string valStr;
                         if (elementExist[j])    // exists next element
                         {
                             valStr = line.Substring(elementIndex[i] + 1, elementIndex[j] - elementIndex[i] - 1);
