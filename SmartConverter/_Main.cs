@@ -12,7 +12,7 @@ namespace SmartConverter
         {
 
             string pathGcodeFile = args[0];
-            int layerHeight = Int32.Parse(args[1]);
+            double layerHeight = Double.Parse(args[1]);
 
             //string pathGcodeFile = @"D:\C#\Code\NX12\SmartConverter\SmartConverter\GcodeFile_generatedFromCura4.3\2xUM2_beam.gcode";
             //string pathToCheck = @"D:\C#\Code\NX12\SmartConverter\SmartConverter\CheckGcode.txt";
@@ -28,7 +28,7 @@ namespace SmartConverter
             }
         }
 
-        private static int BuildModelInNX(string pathGcodeFile, int layerHeight, string pathFilteredGcode = "")
+        private static int BuildModelInNX(string pathGcodeFile, double layerHeight, string pathFilteredGcode = "")
         {
             // 1. read gcode file
             GcodeFile myGcodeFile = new GcodeFile(pathGcodeFile);

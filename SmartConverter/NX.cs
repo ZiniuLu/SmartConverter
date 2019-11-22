@@ -123,15 +123,13 @@ namespace SmartConverter
         public void BuildCurrentLayer(int layerNr, _Contour myContour)
         {
             // 3.1 create a sketch
-            Console.WriteLine("\t\t\t\t3.1 create sketch in layer " + layerNr.ToString());
             CreateSketchInLayer(layerNr);
             
             // 3.2 sketch curve
-            Console.WriteLine("\t\t\t\t3.2 sketch curves in layer " + layerNr.ToString());
             AddCurves(myContour);
             theSession.ActiveSketch.Deactivate(Sketch.ViewReorient.True, Sketch.UpdateLevel.Model);
+           
             // 3.3 build the extrude using splines in current layer
-            Console.WriteLine("\t\t\t\t3.3 build extrude in layer " + layerNr.ToString());
             CreateExtrude(layerNr);
         }
 
@@ -145,7 +143,7 @@ namespace SmartConverter
             Matrix3x3 wcsMatrix = workPart.WCS.CoordinateSystem.Orientation.Element;
             DatumPlane myDatumPlane = workPart.Datums.CreateFixedDatumPlane(nxOrigin, wcsMatrix);
             DisplayableObject[] objects = { myDatumPlane };
-            theSession.DisplayManager.BlankObjects(objects);
+            theSession.DisplayManager.BlankObjects(objects);    // hide datum plane
 
             SketchInPlaceBuilder sketchBuilder = workPart.Sketches.CreateSketchInPlaceBuilder2((Sketch)null);
             sketchBuilder.PlaneOrFace.Value = myDatumPlane;
@@ -241,7 +239,10 @@ namespace SmartConverter
 
             myExtrude.SetName("Extrude_Layer_" + layerNr.ToString());
 
-            
+            DisplayableObject[] objects = { mySketch };
+            theSession.DisplayManager.BlankObjects(objects);    // hide sketch
+
+
         }
 
         public static int GetUnloadOption(string dummy) { return (int)NXOpen.Session.LibraryUnloadOption.Immediately; }
