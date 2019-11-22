@@ -30,7 +30,7 @@ namespace SmartConverter
     public class LayerContour
     {
         private int layerNr;
-        private static double layerHeight = 0.2;
+        private static double layerHeight;
         private double z;
         private List<string> gcodeStringInLayer;
 
@@ -74,9 +74,10 @@ namespace SmartConverter
         }
 
 
-        public LayerContour(int layerNumber, List<string> gcodeInCurrentLayer)
+        public LayerContour(int layerNumber, double layerH, List<string> gcodeInCurrentLayer)
         {
             layerNr = layerNumber;
+            layerHeight = layerH;
             z = layerNr * layerHeight;
             gcodeStringInLayer = gcodeInCurrentLayer;
             GetLayerContour();

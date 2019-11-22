@@ -23,6 +23,7 @@ namespace SmartConverter
         private string path = "";
         private static List<_Contour> gcodeLineInLayer = new List<_Contour> { };
         private static List<GcodeLine> gcodeInLayer = new List<GcodeLine> { };
+        private double layerHeight;
 
         // Property
         public string Name
@@ -55,6 +56,13 @@ namespace SmartConverter
             set
             {
                 gcodeLineInLayer = value;
+            }
+        }
+        public double LayerHeight
+        {
+            set
+            {
+                layerHeight = value;
             }
         }
 
@@ -95,6 +103,11 @@ namespace SmartConverter
         }
 
 
+        public NX(double myLayerHeight)
+        {
+            layerHeight = myLayerHeight;
+        }
+
         private void ConvertGcode(string gcodeInString, int layerNr)
         {
             GcodeLine thisGcode = new GcodeLine(gcodeInString)
@@ -124,7 +137,7 @@ namespace SmartConverter
 
         private void CreateSketchInLayer(int layerNr)
         {
-            double _z = layerNr * 0.2;
+            double _z = layerNr * layerHeight;
 
             // create an empty sketch
             Point3d nxOrigin = new Point3d(0.0, 0.0, 0.0);
@@ -208,7 +221,7 @@ namespace SmartConverter
             extrudeBuilder.AllowSelfIntersectingSection(true);
             extrudeBuilder.DistanceTolerance = 0.001;
             extrudeBuilder.Limits.StartExtend.Value.RightHandSide = "0";
-            extrudeBuilder.Limits.EndExtend.Value.RightHandSide = "0.2";
+            extrudeBuilder.Limits.EndExtend.Value.RightHandSide = layerHeight.ToString();
 
             Extrude myExtrude;
 
