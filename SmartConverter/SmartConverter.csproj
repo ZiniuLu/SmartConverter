@@ -79,6 +79,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="CuraProfile_BuildModelByGcode.curaprofile" />
     <None Include="Resources\NXSigningResource.res" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
